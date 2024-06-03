@@ -48,6 +48,8 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
+    // collections
+    const biodatasCollection = client.db('heartsUnite').collection('biodatas');
     // auth related api
     app.post('/jwt', async (req, res) => {
       const user = req.body
@@ -78,8 +80,21 @@ async function run() {
       }
     })
 
+    // get all biodatas by sorting
+    app.get('/biodatas', async (req, res) => {
+      const result = await biodatasCollection.find().toArray();
+      res.send(result);
+  });
+    
+
+
+
+
+
+
+
     // Send a ping to confirm a successful connection
-    await client.db('admin').command({ ping: 1 })
+    // await client.db('admin').command({ ping: 1 })
     console.log(
       'Pinged your deployment. You successfully connected to MongoDB!'
     )
