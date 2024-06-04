@@ -93,6 +93,16 @@ async function run() {
       const result = await biodatasCollection.findOne(query)
       res.send(result)
     })
+
+    // add a biodata
+    app.post('/biodata', async(req, res) => {
+      const biodata = req.body;
+      const totalBiodatas = await biodatasCollection.countDocuments();
+      const nextBiodataId = totalBiodatas + 1;
+      biodata.biodataId = nextBiodataId;
+      const result = await biodatasCollection.insertOne(biodata)
+      res.send(result)
+    })
     
 
 
