@@ -50,6 +50,7 @@ async function run() {
   try {
     // collections
     const biodatasCollection = client.db('heartsUnite').collection('biodatas');
+    const usersCollection = client.db('heartsUnite').collection('users')
     // auth related api
     app.post('/jwt', async (req, res) => {
       const user = req.body
@@ -80,7 +81,33 @@ async function run() {
       }
     })
 
-    // get all biodatas by sorting
+    // save a user data in db
+    app.put('/user', async(req, res) => {
+      const user = req.body
+      const query = { email: user?.email }
+      // check if user is already exist in db
+      const isExist = await usersCollection.findOne(query)
+      if(isExist) return res.send(isExist)
+
+
+      const options = { upsert: true}
+      const updatedDoc = {
+        $set: {
+          ...user,
+          timestamp: Date.now(),
+        }
+      }
+      const result = await usersCollection.updateOne(query, updatedDoc, options);
+      res.send(result);
+    })
+
+    // get all users from userCollection
+    app.get('/users', async(req, res) => {
+      const result = await usersCollection.find().toArray()
+      res.send(result)
+    })
+
+    // get all biodatas
     app.get('/biodatas', async (req, res) => {
       const result = await biodatasCollection.find().toArray();
       res.send(result);
@@ -101,6 +128,14 @@ async function run() {
       const nextBiodataId = totalBiodatas + 1;
       biodata.biodataId = nextBiodataId;
       const result = await biodatasCollection.insertOne(biodata)
+      res.send(result)
+    })
+
+    // get biodata by email
+    app.get('/viewBiodata/:email', async(req, res) => {
+      const email = req.params.email;
+      const query = {contactEmail: email}
+      const result = await biodatasCollection.find(query).toArray()
       res.send(result)
     })
     
