@@ -89,9 +89,12 @@ async function run() {
       const isExist = await usersCollection.findOne(query)
       if(isExist){
         if(user.status === 'Requested'){
+          // existing user wants to change his role
           const result = await usersCollection.updateOne(query, {$set: {status: user?.status}})
           res.send(result)
-        } else {
+        } 
+        else {
+          // if existing user login again
           return res.send(isExist)
         }
       }
@@ -108,9 +111,30 @@ async function run() {
       res.send(result);
     })
 
+    // get a user info by email from usersCollection db
+    app.get('/user/:email', async(req, res)=>{
+      const email = req.params.email;
+      const result = await usersCollection.findOne({email})
+      res.send(result)
+    })
+
     // get all users from userCollection
     app.get('/users', async(req, res) => {
       const result = await usersCollection.find().toArray()
+      res.send(result)
+    })
+
+    // update a user role
+    app.patch('/users/update/:email', async(req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const query = { email }
+      const updatedDoc = {
+        $set: {
+          ...user
+        }
+      }
+      const result = await usersCollection.updateOne(query, updatedDoc)
       res.send(result)
     })
 
