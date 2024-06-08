@@ -5,6 +5,9 @@ const cors = require('cors')
 const cookieParser = require('cookie-parser')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb')
 const jwt = require('jsonwebtoken')
+const { parse } = require('dotenv')
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY)
+
 
 const port = process.env.PORT || 5000
 
@@ -80,6 +83,23 @@ async function run() {
       } catch (err) {
         res.status(500).send(err)
       }
+    })
+
+    // /create-payment-intent
+    app.post('/create-payment-intent', verifyToken, async(req, res) => {
+      const price = req.body.price
+      const priceInCent = parseFloat(price) * 100
+      // generate clientSecret
+      const {client_secret} = await stripe.paymentIntents.create({
+        amount: priceInCent,
+        currency: "usd",
+        automatic_payment_methods: {
+          enabled: true,
+        },
+      });
+
+      // send clientSecret as response
+      res.send({clientSecret: client_secret})
     })
 
     // save a user data in db
@@ -192,6 +212,14 @@ async function run() {
       res.send(result)
     })
 
+    // contact request endpoints
+    app.get('/checkout/:biodataId', async(req, res) => {
+      const biodataId = req.params.biodataId;
+      const id = parseInt(biodataId)
+      const query = {biodataId: id}
+      const result = await biodatasCollection.findOne(query)
+      res.send(result)
+    })
 
 
 
