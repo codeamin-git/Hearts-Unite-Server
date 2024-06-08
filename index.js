@@ -51,6 +51,7 @@ async function run() {
     // collections
     const biodatasCollection = client.db('heartsUnite').collection('biodatas');
     const usersCollection = client.db('heartsUnite').collection('users')
+    const favBiodatasCollection = client.db('heartsUnite').collection('favBiodatas')
     // auth related api
     app.post('/jwt', async (req, res) => {
       const user = req.body
@@ -170,9 +171,26 @@ async function run() {
       res.send(result)
     })
     
+    // favourite biodata collection
+    app.get('/favBiodatas', async(req, res) => {
+      const result = await favBiodatasCollection.find().toArray();
+      res.send(result)
+    })
 
+    // add a biodata to favourite biodatas collection
+    app.post('/favBiodata', async(req, res) => {
+      const biodata = req.body;
+      const result = await favBiodatasCollection.insertOne(biodata);
+      res.send(result)
+    })
 
-
+    // delete from favourite biodatas collection
+    app.delete('/favBiodata/:id', async(req, res) =>{
+      const id = req.params.id
+      const query = {_id: new ObjectId(id)}
+      const result = await favBiodatasCollection.deleteOne(query);
+      res.send(result)
+    })
 
 
 
