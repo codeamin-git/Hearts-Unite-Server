@@ -52,9 +52,11 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // collections
-    const biodatasCollection = client.db('heartsUnite').collection('biodatas');
-    const usersCollection = client.db('heartsUnite').collection('users')
-    const favBiodatasCollection = client.db('heartsUnite').collection('favBiodatas')
+    const db = client.db('heartsUnite')
+    const biodatasCollection = db.collection('biodatas');
+    const usersCollection = db.collection('users');
+    const favBiodatasCollection = db.collection('favBiodatas');
+    const contactReqsCollection = db.collection('contactRequests');
     // auth related api
     app.post('/jwt', async (req, res) => {
       const user = req.body
@@ -221,6 +223,28 @@ async function run() {
       res.send(result)
     })
 
+    app.get('/constactReqs'), async(req, res) => {
+      const result = await contactReqsCollection.find().toArray()
+      res.send(result)
+    }
+
+    // add to contactRequests collection
+    app.post('/contactReqs', verifyToken, async(req, res) => {
+      const biodata = req.body;
+      const result = await contactReqsCollection.insertOne(biodata);
+      res.send(result)
+    })
+
+    // update room status
+    app.patch('/contactReqs/:id', async(req, res) => {
+      const id = req.params.id
+      const query = { _id: new ObjectId(id)}
+      const updateDoc = {
+        $set: {requestStatus: 'Approved'}
+      }
+      const result = await contactReqsCollection.updateOne(query, updateDoc);
+      res.send(result)
+    })
 
 
     // Send a ping to confirm a successful connection
