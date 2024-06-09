@@ -175,6 +175,14 @@ async function run() {
       res.send(result)
     })
 
+    // get biodata by email
+    app.get('/viewBiodata/:email', async(req, res) => {
+      const email = req.params.email;
+      const query = {contactEmail: email}
+      const result = await biodatasCollection.find(query).toArray()
+      res.send(result)
+    })
+
     // add a biodata
     app.post('/biodata', async(req, res) => {
       const biodata = req.body;
@@ -185,11 +193,16 @@ async function run() {
       res.send(result)
     })
 
-    // get biodata by email
-    app.get('/viewBiodata/:email', async(req, res) => {
-      const email = req.params.email;
-      const query = {contactEmail: email}
-      const result = await biodatasCollection.find(query).toArray()
+    // make premium apis
+    app.patch('/biodata/:id', async(req, res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const updateDoc = {
+        $set:{
+          biodataStatus: 'Requested'
+        }
+      }
+      const result = await biodatasCollection.updateOne(query, updateDoc)
       res.send(result)
     })
     
