@@ -223,10 +223,17 @@ async function run() {
       res.send(result)
     })
 
-    app.get('/constactReqs'), async(req, res) => {
+    app.get('/contactReqs', async(req, res)=>{
       const result = await contactReqsCollection.find().toArray()
       res.send(result)
-    }
+    })
+
+    app.get('/contactReqs/:email', async(req, res)=>{
+      const email = req.params.email;
+      const query = {requester: email}
+      const result = await contactReqsCollection.find(query).toArray()
+      res.send(result)
+    })
 
     // add to contactRequests collection
     app.post('/contactReqs', verifyToken, async(req, res) => {
@@ -235,7 +242,7 @@ async function run() {
       res.send(result)
     })
 
-    // update room status
+    // update request status
     app.patch('/contactReqs/:id', async(req, res) => {
       const id = req.params.id
       const query = { _id: new ObjectId(id)}
@@ -243,6 +250,14 @@ async function run() {
         $set: {requestStatus: 'Approved'}
       }
       const result = await contactReqsCollection.updateOne(query, updateDoc);
+      res.send(result)
+    })
+
+    // delete my contact request
+    app.delete('/contactReqs/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await contactReqsCollection.deleteOne(query)
       res.send(result)
     })
 
