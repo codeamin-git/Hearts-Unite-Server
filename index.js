@@ -142,10 +142,15 @@ async function run() {
     })
 
     // get all users from userCollection
-    app.get('/users', async(req, res) => {
-      const result = await usersCollection.find().toArray()
-      res.send(result)
-    })
+    app.get('/users', async (req, res) => {
+      const { username } = req.query;
+      let query = {};
+      if (username) {
+          query.username = { $regex: username, $options: 'i' }; // Case-insensitive search
+      }
+      const result = await usersCollection.find(query).toArray();
+      res.send(result);
+  });
 
     // update a user role
     app.patch('/users/update/:email', async(req, res) => {
@@ -287,7 +292,7 @@ async function run() {
     })
 
     // admin dashboard
-    app.get('/admin-stat', async(req, res) => {
+    app.get('/admin-stat', verifyToken, async(req, res) => {
       const biodatas = await biodatasCollection.find().toArray();
 
       const maleBiodata = await biodatasCollection.countDocuments({biodataType: 'Male'});
