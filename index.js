@@ -176,7 +176,7 @@ async function run() {
     })
 
     // get biodata by email
-    app.get('/viewBiodata/:email', async(req, res) => {
+    app.get('/viewBiodata/:email', verifyToken, async(req, res) => {
       const email = req.params.email;
       const query = {contactEmail: email}
       const result = await biodatasCollection.find(query).toArray()
@@ -286,6 +286,21 @@ async function run() {
       res.send(result)
     })
 
+    // admin dashboard
+    app.get('/admin-stat', async(req, res) => {
+      const biodatas = await biodatasCollection.find().toArray();
+
+      const maleBiodata = await biodatasCollection.countDocuments({biodataType: 'Male'});
+
+      const femaleBiodata = await biodatasCollection.countDocuments({biodataType: 'Female'});
+
+      const premiumBiodata = await biodatasCollection.countDocuments({biodataStatus: 'Premium'})
+
+      const revenue = await contactReqsCollection.countDocuments();
+      totalRevenue = revenue*5
+
+      res.send({totalBiodata: biodatas.length, maleBiodata, femaleBiodata, premiumBiodata, totalRevenue})
+    })
 
     // Send a ping to confirm a successful connection
     // await client.db('admin').command({ ping: 1 })
