@@ -57,6 +57,7 @@ async function run() {
     const usersCollection = db.collection('users');
     const favBiodatasCollection = db.collection('favBiodatas');
     const contactReqsCollection = db.collection('contactRequests');
+    const successStoriesCollection = db.collection('successStories');
     // auth related api
     app.post('/jwt', async (req, res) => {
       const user = req.body
@@ -305,6 +306,18 @@ async function run() {
       totalRevenue = revenue*5
 
       res.send({totalBiodata: biodatas.length, maleBiodata, femaleBiodata, premiumBiodata, totalRevenue})
+    })
+
+    // success stories collection
+    app.get('/success-stories', async(req, res)=>{
+      result = await successStoriesCollection.find().toArray()
+      res.send(result)
+    })
+
+    app.post('/success-stories', async(req, res)=>{
+      const story = req.body
+      const result = await successStoriesCollection.insertOne(story)
+      res.send(result)
     })
 
     // Send a ping to confirm a successful connection
