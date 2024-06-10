@@ -169,8 +169,15 @@ async function run() {
 
     // get all biodatas
     app.get('/biodatas', async (req, res) => {
-      const result = await biodatasCollection.find().toArray();
-      res.send(result);
+      const { page = 1, limit = 4 } = req.query;
+
+      const skip = (page -1) * parseInt(limit, 10);
+      const totalItems = await biodatasCollection.countDocuments();
+      const result = await biodatasCollection.find().skip(skip).limit(parseInt(limit, 10)).toArray();
+      res.send({
+        biodatas: result,
+        total: totalItems
+      });
   });
 
     // get a single biodata by _id
