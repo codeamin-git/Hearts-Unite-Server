@@ -207,16 +207,23 @@ async function run() {
     })
 
     // make premium apis
+    app.get('/allPremiumReq', async(req, res)=>{
+      const query = {biodataStatus: 'Requested'}
+      const result = await biodatasCollection.find(query).toArray()
+      res.send(result)
+    })
+
     app.patch('/biodata/:id', async(req, res)=>{
       const id = req.params.id;
       const query = {_id: new ObjectId(id)}
       const updateDoc = {
         $set:{
-          biodataStatus: 'Requested'
+          biodataStatus: req.body.biodataStatus
         }
       }
       const result = await biodatasCollection.updateOne(query, updateDoc)
-      res.send(result)
+      console.log(req.body);
+     res.send(result)
     })
     
     app.patch('/makePremium/:id', async(req, res)=>{
