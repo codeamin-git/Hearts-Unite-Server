@@ -213,6 +213,12 @@ async function run() {
       res.send(result)
     })
 
+    app.get('/allPremiumMember', async(req, res)=>{
+      const query = {biodataStatus: 'Premium'}
+      const result = await biodatasCollection.find(query).toArray()
+      res.send(result)
+    })
+
     app.patch('/biodata/:id', async(req, res)=>{
       const id = req.params.id;
       const query = {_id: new ObjectId(id)}
