@@ -188,6 +188,14 @@ async function run() {
       res.send(result)
     })
 
+    // Get similar biodatas based on biodataType
+    app.get('/similarBiodatas', async (req, res) => {
+    const { biodataType } = req.query;
+    const query = { biodataType: biodataType };
+    const similarBiodatas = await biodatasCollection.find(query).limit(3).toArray();
+    res.send(similarBiodatas);
+    });
+
     // get biodata by email
     app.get('/viewBiodata/:email', verifyToken, async(req, res) => {
       const email = req.params.email;
@@ -313,7 +321,7 @@ async function run() {
     })
 
     // admin dashboard
-    app.get('/admin-stat', verifyToken, async(req, res) => {
+    app.get('/admin-stat', async(req, res) => {
       const biodatas = await biodatasCollection.find().toArray();
 
       const maleBiodata = await biodatasCollection.countDocuments({biodataType: 'Male'});
@@ -325,7 +333,9 @@ async function run() {
       const revenue = await contactReqsCollection.countDocuments();
       totalRevenue = revenue*5
 
-      res.send({totalBiodata: biodatas.length, maleBiodata, femaleBiodata, premiumBiodata, totalRevenue})
+      const totalMarriage = await successStoriesCollection.countDocuments();
+
+      res.send({totalBiodata: biodatas.length, maleBiodata, femaleBiodata, premiumBiodata, totalRevenue, totalMarriage})
     })
 
     // success stories collection
